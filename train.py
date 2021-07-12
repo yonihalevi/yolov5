@@ -47,6 +47,7 @@ from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_di
 from utils.wandb_logging.wandb_utils import WandbLogger, check_wandb_resume
 from utils.metrics import fitness
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 logger = logging.getLogger(__name__)
 LOCAL_RANK = int(os.getenv('LOCAL_RANK', -1))  # https://pytorch.org/docs/stable/elastic/run.html
 RANK = int(os.getenv('RANK', -1))
@@ -457,8 +458,6 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                     results, _, _ = test.run(data_dict,
                                              batch_size=batch_size // WORLD_SIZE * 2,
                                              imgsz=imgsz_test,
-                                             conf_thres=0.001,
-                                             iou_thres=0.7,
                                              model=attempt_load(m, device).half(),
                                              single_cls=single_cls,
                                              dataloader=testloader,
