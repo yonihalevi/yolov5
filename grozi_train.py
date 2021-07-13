@@ -4,7 +4,7 @@ import train
 
 def main():
     gp.etl()
-    train.run(imgsz=3264, batch=2, epochs=10, data="grozi.yaml", weights="yolov5l.pt")
+    train.run(imgsz=3264, batch=2, epochs=10, data="grozi.yaml", weights="yolov5m.pt")
 
 if __name__ == "__main__":
     main()
