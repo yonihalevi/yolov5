@@ -1,4 +1,4 @@
-import GroziPrep as gp
+import grozi_prep as gp
 import train
 
 
