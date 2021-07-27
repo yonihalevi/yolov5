@@ -13,13 +13,31 @@ grozi_drive_id = '1Fx9lvmjthe3aOqjvKc6MJpMuLF22I1Hp'
 grozi_path = '../'
 grozi_dir = 'grozi'
 grozi_ziptmp = 'grozi.zip'
-
+resized_dir = grozi_path + grozi_dir + "/src/408/"
+original_dir = grozi_path + grozi_dir + "/src/3264/"
 
 def fetch_dataset():
     gdd.download_file_from_google_drive(grozi_drive_id, grozi_path + grozi_ziptmp, unzip=False)
+    if os.path.isdir(grozi_path + grozi_dir):
+        shutil.rmtree(grozi_path + grozi_dir)
     zf = ZipFile(grozi_path + grozi_ziptmp)
     zf.extractall("../")
     zf.close()
+
+
+def resize_images():
+    if os.path.isdir(resized_dir):
+        shutil.rmtree(resized_dir)
+
+    os.mkdir(resized_dir)
+
+    original_images = [original_dir + img for img in os.listdir(original_dir) if img[-3:] == 'jpg']
+
+    for oi in original_images:
+        image = cv2.imread(oi)
+        dim = (int(image.shape[1]/8), int(image.shape[0]/8))
+        resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+        cv2.imwrite(oi.replace("3264","408",1),resized)
 
 
 def create_annotation_txt():
@@ -53,8 +71,7 @@ def create_annotation_txt():
 
         #print(bboxes[bbox[0]])
 
-    images = [grozi_path + grozi_dir + '/src/3264/' + img for img in os.listdir(grozi_path + grozi_dir + '/src/3264/')
-              if img[-3:] == 'jpg']
+    images = [resized_dir + img for img in os.listdir(resized_dir) if img[-3:] == 'jpg']
 
     for img in images:
         print_buffer = []
@@ -68,7 +85,7 @@ def create_annotation_txt():
 
 
 def show_annotation(imageid):
-    annotation_path = grozi_path + grozi_dir + '/src/3264/' + str(imageid) + '.txt'
+    annotation_path = resized_dir + str(imageid) + '.txt'
     image_path = annotation_path.replace("txt", "jpg")
 
     # load the annotation file into an numpy array
@@ -80,8 +97,8 @@ def show_annotation(imageid):
 
     # load image
     img = cv2.imread(image_path)
-    h = img.shape[0]
     w = img.shape[1]
+    h = img.shape[0]
 
     # now we convert annotations to a np array an manipulat eit from cx cy w h to x0 y0 x1 y1 bounding box
     np_annotations = np.array(annotations)
@@ -99,7 +116,7 @@ def show_annotation(imageid):
     for ann in scaled_annotations:
         cls, left, top, right, bottom = (round(x) for x in ann)
 
-        label_size, base_line = cv2.getTextSize(classes[cls], cv2.FONT_HERSHEY_SIMPLEX, 2, 1)
+        label_size, base_line = cv2.getTextSize(classes[cls], cv2.FONT_HERSHEY_SIMPLEX, 0.25 , 1)
 
         cv2.rectangle(img, (left, top), (right, bottom), (255, 0, 0), cv2.LINE_4)
         cv2.rectangle(img, (left, top - round(1.5 * label_size[1])),
@@ -107,25 +124,16 @@ def show_annotation(imageid):
                            (255, 0, 0), cv2.FILLED
                       )
 
-        cv2.putText(img, classes[cls], (left, top), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), thickness=5)
+        cv2.putText(img, classes[cls], (left, top), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), thickness=1)
 
-    scale_percent = 30  # percent of original size
-    w = int(w * scale_percent / 100.0)
-    h = int(h * scale_percent / 100.0)
-    dim = (w, h)
-
-    # resize image
-    resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    cv2.imshow("image", resized)
-#    cv2.imshow("image", img)
-    cv2.waitKey(0)
+    cv2.imshow(image_path, img)
+    cv2.waitKey(3000)
     cv2.destroyAllWindows()
 
 
 def create_segmentation_of_data():
 
-    images = [grozi_path + grozi_dir + '/src/3264/' + img for img in os.listdir(grozi_path + grozi_dir + '/src/3264/')
-              if img[-3:] == 'jpg']
+    images = [resized_dir + img for img in os.listdir(resized_dir)if img[-3:] == 'jpg']
 
     annotations = [x.replace('jpg', 'txt') for x in images]
 
@@ -153,6 +161,7 @@ def create_segmentation_of_data():
 
 def etl():
     fetch_dataset()
+    resize_images()
     create_annotation_txt()
     create_segmentation_of_data()
 
