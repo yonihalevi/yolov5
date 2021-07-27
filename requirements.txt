@@ -31,3 +31,4 @@ pandas
 thop  # FLOPs computation
 pyexcel-ods3
 googledrivedownloader
+sklearn
