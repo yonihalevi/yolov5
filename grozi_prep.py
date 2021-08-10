@@ -13,7 +13,7 @@ grozi_drive_id = '1Fx9lvmjthe3aOqjvKc6MJpMuLF22I1Hp'
 grozi_path = '../'
 grozi_dir = 'grozi'
 grozi_ziptmp = 'grozi.zip'
-resized_dir = grozi_path + grozi_dir + "/src/816/"
+resized_dir = grozi_path + grozi_dir + "/src/408/"
 original_dir = grozi_path + grozi_dir + "/src/3264/"
 
 def fetch_dataset():
@@ -35,9 +35,9 @@ def resize_images():
 
     for oi in original_images:
         image = cv2.imread(oi)
-        dim = (int(image.shape[1]/4), int(image.shape[0]/4))
+        dim = (int(image.shape[1]/8), int(image.shape[0]/8))
         resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
-        cv2.imwrite(oi.replace("3264","816",1),resized)
+        cv2.imwrite(oi.replace("3264","408",1),resized)
 
 def create_annotation_txt():
     data = ods.read_data(grozi_path + grozi_dir + "/classes/grozi.ods")
